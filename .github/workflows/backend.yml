@@ -22,6 +22,9 @@ jobs:
         ssh-add ~/.ssh/id_rsa
         ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
 
+    - name: Debug SSH Connection
+      run: ssh -v ec2-user@18.208.169.188 exit
+
     - name: Deploy to EC2
       run: |
         ssh ec2-user@18.208.169.188 << 'EOF'
