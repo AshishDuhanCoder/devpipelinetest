@@ -15,14 +15,13 @@ jobs:
 
       - name: Set up SSH
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | base64 --decode > /home/ec2-user/.ssh/test.pem
+          chmod 600 /home/ec2-user/.ssh/test.pem
+          ssh-keyscan -H 18.208.169.188 >> /home/ec2-user/.ssh/known_hosts
 
       - name: Deploy Application
         run: |
-          ssh -i /home/ec2-user/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
+          ssh -i /home/ec2-user/.ssh/test.pem ec2-user@18.208.169.188 << 'EOF'
             cd /home/ec2-user/app
             
             # Pull latest code
