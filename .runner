@@ -1,0 +1,9 @@
+﻿{
+  "agentId": 2,
+  "agentName": "ip-172-31-90-156",
+  "poolId": 1,
+  "poolName": "Default",
+  "serverUrl": "https://pipelinesghubeus15.actions.githubusercontent.com/V4e6rPFYTvfgebOcbMYcpFRWjOBmKlFqgTprLls9MBMmNgsNpW/",
+  "gitHubUrl": "https://github.com/AshishDuhanCoder/devpipelinetest",
+  "workFolder": "_work"
+}
