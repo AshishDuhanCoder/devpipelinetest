@@ -22,7 +22,8 @@ jobs:
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST << 'EOF'
+            cd /home/ec2-user/devpipelinetest/backend
             git pull origin main
-            npm install
+            sudo npm install
             pm2 restart backend-app
           EOF
