@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy Application
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
+          ssh -i /home/ec2-user/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
             cd /home/ec2-user/app
             
             # Pull latest code
