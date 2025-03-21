@@ -17,6 +17,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          path: _work/devpipelinetest/devpipelinetest
 
       - name: Setup SSH
         run: |
@@ -28,7 +30,8 @@ jobs:
       - name: Deploy Backend
         run: |
           ssh ec2-user@18.208.169.188 << 'EOF'
-            cd backend
+            cd /home/ec2-user/app/_work/devpipelinetest/devpipelinetest/backend
             git pull origin main
             docker-compose up --build -d
           EOF
+
