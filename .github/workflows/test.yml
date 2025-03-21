@@ -57,7 +57,7 @@ jobs:
       - name: Deploy Application
         run: |
           ssh -i ~/.ssh/test.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /path/to/your/app  # Change this path
+            cd /home/ec2-user/app  # Change this path
             git pull origin main
             docker-compose up -d --build  # Modify if not using Docker
             echo "Deployment Successful"
