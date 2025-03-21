@@ -1,4 +1,4 @@
-name: Deploy Frontend
+name: Deploy Frontend & Backend with Docker Compose
 
 on:
   push:
@@ -16,16 +16,23 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
 
-      - name: Deploy Frontend
+      - name: Deploy Application
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
-            cd /home/ec2-user/app/frontend1 || { mkdir -p /home/ec2-user/app/frontend1 && cd /home/ec2-user/app/frontend1; }
-            npm install
-            npm run build
-            sudo cp -r build/* /var/www/html
-            sudo systemctl restart nginx
+          ssh -i ~/.ssh/id_rsa user@18.208.169.188 << 'EOF'
+            cd /home/ec2-user/app
+            
+            # Pull latest code
+            git pull origin main
+            
+            # Restart Docker Containers
+            docker-compose down
+            docker-compose build
+            docker-compose up -d --remove-orphans
+
+            # Clean up unused Docker images
+            docker system prune -af
           EOF
