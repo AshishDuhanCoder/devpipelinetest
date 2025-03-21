@@ -10,10 +10,21 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Ensure Node.js is Installed in Expected Path
+        run: |
+          NODE_PATH="/home/ec2-user/app/_work/devpipelinetest/devpipelinetest/externals/node20/bin/node"
+          if [ ! -f "$NODE_PATH" ]; then
+            echo "Node.js not found in $NODE_PATH. Installing..."
+            curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+            sudo yum install -y nodejs
+          fi
+          echo "Using Node.js from: $NODE_PATH"
+          echo "PATH=$NODE_PATH:$PATH" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          path: _work/devpipelinetest/devpipelinetest
+          path: /home/ec2-user/app/_work/devpipelinetest/devpipelinetest
 
       - name: Setup SSH
         run: |
@@ -29,4 +40,3 @@ jobs:
             git pull origin main
             docker-compose up --build -d
           EOF
-
