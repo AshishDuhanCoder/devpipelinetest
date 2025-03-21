@@ -15,19 +15,19 @@ jobs:
 
     - name: Setup SSH
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        mkdir -p /home/app/.ssh
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > /home/app/.ssh/id_rsa
+        chmod 600 /home/app/.ssh/id_rsa
         eval "$(ssh-agent -s)"
-        ssh-add ~/.ssh/id_rsa
-        ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
+        ssh-add /home/app/.ssh/id_rsa
+        ssh-keyscan -H 18.208.169.188 >> /home/app/.ssh/known_hosts
 
     - name: Debug SSH Connection
-      run: ssh -v ec2-user@18.208.169.188 exit
+      run: ssh -i /home/app/.ssh/id_rsa ec2-user@18.208.169.188 exit
 
     - name: Deploy to EC2
       run: |
-        ssh ec2-user@18.208.169.188 << 'EOF'
+        ssh -i /home/app/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
           cd /home/ec2-user/app/backend  # Navigate to backend folder
           git pull origin main
           docker-compose down
