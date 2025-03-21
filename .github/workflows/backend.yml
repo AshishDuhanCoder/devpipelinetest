@@ -13,15 +13,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Check SSH Connection
+    - name: Setup SSH Key
       run: |
-        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > id_rsa
-        chmod 600 id_rsa
-        ssh -o StrictHostKeyChecking=no -i id_rsa ec2-user@18.208.169.188 "echo 'SSH connection successful'"
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/id_rsa
+        ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
+
+    - name: Debug SSH Connection
+      run: ssh -i ~/.ssh/id_rsa ec2-user@18.208.169.188 exit
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i id_rsa ec2-user@18.208.169.188 << 'EOF'
+        ssh -i ~/.ssh/id_rsa ec2-user@18.208.169.188 << 'EOF'
           cd /home/ec2-user/app/backend  # Navigate to backend folder
           git pull origin main
           docker-compose down
