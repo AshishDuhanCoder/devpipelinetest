@@ -13,26 +13,52 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh
+      # 🛠️ Fix 1: Reinstall OpenSSL
+      - name: Reinstall OpenSSL and dependencies
+        run: sudo apt-get update && sudo apt-get install --reinstall -y openssl libssl-dev
 
+      # 🛠️ Create SSH directory
+      - name: Create SSH directory
+        run: mkdir -p ~/.ssh && chmod 700 ~/.ssh
+
+      # 🛠️ Fix 2: Add Private Key & Debug Format
       - name: Add private key
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/test.pem
           chmod 600 ~/.ssh/test.pem
           ls -lah ~/.ssh/test.pem  # Debugging step
+          cat ~/.ssh/test.pem | head -n 5  # Check key format
 
+      # 🛠️ Fix 3: Convert OpenSSH Key to RSA (if needed)
+      - name: Convert OpenSSH Key to RSA
+        run: ssh-keygen -p -m PEM -f ~/.ssh/test.pem -N "" || true
+
+      # 🛠️ Fix 4: Debug OpenSSL & SSH Versions
+      - name: Debug OpenSSL & SSH Versions
+        run: |
+          openssl version
+          ssh -V
+
+      # 🛠️ Restart SSH agent and add key
       - name: Start SSH agent and add key
         run: |
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/test.pem
 
+      # 🛠️ Add known hosts to prevent prompts
       - name: Add known hosts
         run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
+      # ✅ Test SSH Connection
       - name: Test SSH connection
-        run: ssh -i ~/.ssh/test.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection Successful'"
+        run: ssh -i ~/.ssh/test.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection Successful'"
 
+      # 🚀 Deploy Application
       - name: Deploy Application
         run: |
-     
+          ssh -i ~/.ssh/test.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /path/to/your/app  # Change this path
+            git pull origin main
+            docker-compose up -d --build  # Modify if not using Docker
+            echo "Deployment Successful"
+          EOF
