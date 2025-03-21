@@ -1,0 +1,38 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change this if needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create SSH directory
+        run: mkdir -p ~/.ssh
+
+      - name: Add private key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/test.pem
+          chmod 600 ~/.ssh/test.pem
+          ls -lah ~/.ssh/test.pem  # Debugging step
+
+      - name: Start SSH agent and add key
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/test.pem
+
+      - name: Add known hosts
+        run: ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: ssh -i ~/.ssh/test.pem ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH Connection Successful'"
+
+      - name: Deploy Application
+        run: |
+     
