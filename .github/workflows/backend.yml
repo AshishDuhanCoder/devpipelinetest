@@ -1,0 +1,30 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main  # Change this to your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 18.208.169.188 >> ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        ssh ec2-user@18.208.169.188 << 'EOF'
+          cd /home/ec2-user/app/backend/  # Navigate to the backend folder
+          git pull origin main
+          docker-compose down
+          docker-compose up -d --build
+        EOF
