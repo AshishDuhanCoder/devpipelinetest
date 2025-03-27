@@ -28,7 +28,7 @@ jobs:
             cd /home/ec2-user/devpipelinetest/backend
 
             echo "Building Docker image..."
-            docker build -t backend-backend:latest .
+            docker build -t docker/backend-backend:latest .
 
             echo "Updating Kubernetes deployment..."
             cd /home/ec2-user/devpipelinetest/backend/k8s
