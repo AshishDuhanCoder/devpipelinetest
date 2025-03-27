@@ -1,0 +1,40 @@
+name: Deploy to K3s on EC2
+
+on:
+  push:
+    branches:
+      - main  # Change to your main branch if necessary
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ec2-user
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          echo "Connecting to EC2 and deploying..."
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            echo "Pulling latest code..."
+            cd /home/ec2-user/devpipelinetest/backend
+            git pull origin main
+
+            echo "Building Docker image..."
+            docker build -t backend-backend:latest .
+
+            echo "Updating Kubernetes deployment..."
+            cd /home/ec2-user/devpipelinetest/backend/k8s
+            k3s kubectl apply -f deployment.yaml
+            k3s kubectl apply -f service.yaml
+
+            echo "Deployment successful!"
+          EOF
