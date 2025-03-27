@@ -1,4 +1,4 @@
-name: Deploy to K3s on EC2
+name: Deploy to K3 on EC2
 
 on:
   push:
@@ -28,7 +28,8 @@ jobs:
             cd /home/ec2-user/devpipelinetest/backend
 
             echo "Building Docker image..."
-            docker build -t docker/backend-backend:latest .
+            docker-compose build
+            docker-compose up -d
 
             echo "Updating Kubernetes deployment..."
             cd /home/ec2-user/devpipelinetest/backend/k8s
