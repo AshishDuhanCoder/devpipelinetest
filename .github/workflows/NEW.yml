@@ -26,7 +26,6 @@ jobs:
           ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
             echo "Pulling latest code..."
             cd /home/ec2-user/devpipelinetest/backend
-            git pull origin main
 
             echo "Building Docker image..."
             docker build -t backend-backend:latest .
