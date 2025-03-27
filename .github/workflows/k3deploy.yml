@@ -1,0 +1,33 @@
+name: Deploy to K3s on EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            echo "Pulling latest code..."
+            cd /home/ec2-user/devpipelinetest/backend
+            git pull origin main
+            echo "Building Docker image..."
+            docker build -t backend-backend:latest .
+            docker push backend-backend:latest
+            echo "Updating Kubernetes deployment..."
+            cd /home/ec2-user/devpipelinetest/backend/k8s
+            k3s kubectl apply -f deployment.yaml
+            k3s kubectl apply -f service.yaml
+            echo "Deployment successful!"
